@@ -50,7 +50,7 @@ class  GoBooDo:
             req = requests.get("https://google."+self.country,verify=False)
             self.head = {
                 'Host': 'books.google.'+self.country,
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:53.0) Gecko/20100101 Firefox/53.00',
+                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:87.0) Gecko/20100101 Firefox/87.0',
                 'Accept': '*/*',
                 'Accept-Language': 'en-US,en;q=0.5',
                 'Accept-Encoding': 'gzip, deflate',
@@ -76,6 +76,7 @@ class  GoBooDo:
 
     def getInitialData(self):
         initUrl = "https://books.google." + self.country + "/books?id=" + self.id + "&printsec=frontcover"
+        print( initUrl )
         pageData = requests.get(initUrl, headers=self.head, verify=False)
         soup = BeautifulSoup(pageData.content, "html5lib")
         self.name = soup.findAll("title")[0].contents[0]
@@ -207,14 +208,19 @@ Y8.   .88 88.  .88  88    .88 88.  .88 88.  .88 88    .8P 88.  .88
 ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo                                                                                                                                
     ''')
     book_id = args.id
+    print( book_id )
     if(book_id==None or len(book_id)!=12):
         print('No book id given or incorrect book id given')
         exit(0)
     retry_time = settings['global_retry_time']
+    print( retry_time )
     if retry_time!=0:
         while True:
             book = GoBooDo(args.id)
+            print( book )
+            
             book.start()
+            print( "book.start() completed." )            
             print('The programming is currently waiting for the next iteration and can be exited safely.')
             if len(book.obstinatePages)==0:
                 print('There are no pages to be fetched. Exiting')
