@@ -47,13 +47,13 @@ class  GoBooDo:
 
     def resethead(self):
         try:
-            print( "req URL: " + "https://books.google." + str( self.country ) )
+            resethead_URL =  "https://books.google." + str( self.country ) + "/books"
+            print( "resethead_URL: " + resethead_URL )
 
-            req_session = requests.Session()
-            print( "req_session: " + str( req_session ) )
-            
-            req = req_session.get( "https://books.google." + self.country, verify=False )
+            req = requests.get( resethead_URL, verify=False )
             print( "req: " + str( req ) )
+
+            print( "req.headers: " + str( req.headers ) )
 
             print( "req.cookies: " + str( req.cookies ) )
             print( "type of req.cookies: " + str( type( req.cookies ) ) )
@@ -62,13 +62,13 @@ class  GoBooDo:
             print( "req.cookies['NID']: " + str( req.cookies['NID'] ) )
             
             self.head = {
-                'Host': 'books.google.'+self.country,
+                'Host': 'books.google.' + str( self.country ),
                 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:87.0) Gecko/20100101 Firefox/87.0',
                 'Accept': '*/*',
                 'Accept-Language': 'en-US,en;q=0.5',
                 'Accept-Encoding': 'gzip, deflate',
                 'Connection': 'close',
-                'Cookie': "NID=" + str(req.cookies['NID']),
+                'Cookie': "NID=" + str( req.cookies['NID'] ),
                         }
             print( "resethead() completed." )
         except Exception as e:
@@ -91,12 +91,19 @@ class  GoBooDo:
             self.pageLinkDict[pageData['pid']]['order'] = pageData['order']
 
     def getInitialData(self):
-        initUrl = "https://books.google." + self.country + "/books?id=" + self.id + "&printsec=frontcover"
+        initUrl = "https://books.google." + str( self.country ) + "/books?id=" + str( self.id ) + "&printsec=frontcover"
         print( "initURL: " + initUrl )
 
-        print( "self.head: " + str( self.head ) )
-        pageData = requests.get(initUrl, headers=self.head, verify=False)
-        print( "pageData: " + pageData )
+        print( "self.head: " + str( self.head ) + "\n" )
+
+        try:
+            pageData = requests.get( initUrl, headers = self.head, verify = False)
+            print( "pageData: " + str( pageData ) )
+            print( "Got pageData.\n" )
+        except Exception as e:
+            print( "Error in getting pageData." )
+            print( e )
+            exit( 0 )
         
         soup = BeautifulSoup(pageData.content, "html5lib")
         self.name = soup.findAll("title")[0].contents[0]
@@ -173,6 +180,7 @@ class  GoBooDo:
     def start(self):
         try:
             self.getInitialData()
+            print( "Within start(self), self.getInitialData() completed." )
         except:
             print('Received invalid response')
             exit(0)
@@ -182,6 +190,8 @@ class  GoBooDo:
             print('There appears to be no page links to be fetched, fetching the images for downloaded links')
             return self.processBook()
         maxPageLimit = 0
+        print( "maxPageLimit: " + str( maxPageLimit ) )
+        
         maxPageLimitHit = settings['max_retry_links']+2
         proxyFlag = 0
         while True:
