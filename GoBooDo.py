@@ -47,7 +47,20 @@ class  GoBooDo:
 
     def resethead(self):
         try:
-            req = requests.get("https://google."+self.country,verify=False)
+            print( "req URL: " + "https://books.google." + str( self.country ) )
+
+            req_session = requests.Session()
+            print( "req_session: " + str( req_session ) )
+            
+            req = req_session.get( "https://books.google." + self.country, verify=False )
+            print( "req: " + str( req ) )
+
+            print( "req.cookies: " + str( req.cookies ) )
+            print( "type of req.cookies: " + str( type( req.cookies ) ) )
+            print( "req.cookies include: " + str( req.cookies.get_dict() ) )
+
+            print( "req.cookies['NID']: " + str( req.cookies['NID'] ) )
+            
             self.head = {
                 'Host': 'books.google.'+self.country,
                 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:87.0) Gecko/20100101 Firefox/87.0',
@@ -57,10 +70,13 @@ class  GoBooDo:
                 'Connection': 'close',
                 'Cookie': "NID=" + str(req.cookies['NID']),
                         }
+            print( "resethead() completed." )
         except Exception as e:
+            print( "resethead() had an exception." )
             if 'captcha'.encode() in req.content:
                 print("IP detected by Google for too much requests, asking for captcha completion. Please wait some minutes before trying again. \n")
             else:
+                print( "The exception wasn't about too much requests." )
                 print(e)
 
     def getProxy(self):
@@ -76,8 +92,12 @@ class  GoBooDo:
 
     def getInitialData(self):
         initUrl = "https://books.google." + self.country + "/books?id=" + self.id + "&printsec=frontcover"
-        print( initUrl )
+        print( "initURL: " + initUrl )
+
+        print( "self.head: " + str( self.head ) )
         pageData = requests.get(initUrl, headers=self.head, verify=False)
+        print( "pageData: " + pageData )
+        
         soup = BeautifulSoup(pageData.content, "html5lib")
         self.name = soup.findAll("title")[0].contents[0]
         print(f'Downloading {self.name[:-15]}')
@@ -208,16 +228,18 @@ Y8.   .88 88.  .88  88    .88 88.  .88 88.  .88 88    .8P 88.  .88
 ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo                                                                                                                                
     ''')
     book_id = args.id
-    print( book_id )
+    print( "book_id: " + book_id )
     if(book_id==None or len(book_id)!=12):
         print('No book id given or incorrect book id given')
         exit(0)
+
     retry_time = settings['global_retry_time']
-    print( retry_time )
+    print( "retry_time: " + str( retry_time ) )
+    
     if retry_time!=0:
         while True:
-            book = GoBooDo(args.id)
-            print( book )
+            book = GoBooDo( args.id )
+            print( "book: " + str( book ) )
             
             book.start()
             print( "book.start() completed." )            
